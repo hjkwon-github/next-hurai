@@ -7,12 +7,13 @@ on:
 
 permissions:
   contents: read
+  actions: read
   pages: write
   id-token: write
 
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -46,6 +47,29 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
+      # Branch publishing starts GitHub's own Pages workflow on every push.
+      # Wait for it so its raw-source deployment cannot replace the Next.js site.
+      - name: Wait for branch Pages deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            for (let attempt = 0; attempt < 60; attempt++) {
+              const branch = await github.rest.repos.getBranch({ owner, repo, branch: "main" });
+              if (branch.data.commit.sha !== context.sha) {
+                core.setFailed("A newer main commit exists; skipping this deployment.");
+                return;
+              }
+              const runs = await github.rest.actions.listWorkflowRunsForRepo({
+                owner, repo, head_sha: context.sha, per_page: 100
+              });
+              const branchRun = runs.data.workflow_runs.find(run =>
+                run.path === "dynamic/pages/pages-build-deployment"
+              );
+              if (branchRun && branchRun.status === "completed") return;
+              await new Promise(resolve => setTimeout(resolve, 10000));
+            }
+            core.setFailed("Timed out waiting for GitHub's branch Pages deployment.");
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

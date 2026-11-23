@@ -19,7 +19,7 @@ GitHub Pages는 서버 코드를 실행하지 않습니다. 외부 API 호출은
 
 ## GitHub Pages 배포
 
-`main`에 푸시하면 GitHub Actions가 정적 사이트를 빌드하고 배포합니다. 저장소의 **Settings → Pages → Build and deployment → Source**를 **GitHub Actions**로 설정하세요. 사이트 주소는 <https://hjkwon-github.github.io/next-hurai/>입니다.
+`main`에 푸시하면 GitHub Actions가 정적 사이트를 빌드하고 배포합니다. 저장소의 **Settings → Pages → Build and deployment**에서 Source를 **Deploy from a branch**, Branch를 **main**으로 설정하세요. GitHub의 브랜치 게시 작업이 끝난 뒤 Next.js 빌드 결과를 배포합니다. 사이트 주소는 <https://hjkwon-github.github.io/next-hurai/>입니다.
 
 배포 빌드는 저장소 경로 `/next-hurai`를 base path로 사용합니다. 외부 API를 연결하려면 저장소의 **Settings → Secrets and variables → Actions → Variables**에 `NEXT_PUBLIC_API_BASE_URL`을 추가하세요. 이 값은 공개 빌드에 포함되므로 비밀을 넣지 마세요. API 서버는 Pages 사이트 origin에 대한 CORS를 허용해야 합니다.
 
